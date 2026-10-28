@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+<head><title>Senior Software Engineer</title></head>
+<body>
+<!-- Captured from bonterra.wd1.myworkdayjobs.com …/apply/autofillWithResume (classes/styles stripped, svgs replaced) -->
+<div data-automation-id="applyFlowPage"><div><div dir="ltr"><button type="button" data-automation-id="backToJobPosting" role="link"><span><i></i></span><span>Back to Job Posting</span></button></div><h2 data-automation-id="jobTitleHeading">Senior Software Engineer</h2></div><div aria-label="Application Progress"><ol data-automation-id="progressBar"><li data-automation-id="progressBarActiveStep"><div><div color="#381360"></div><div><div color="#381360"></div></div><div color="#381360"></div></div><label aria-live="polite">current step 1 of 7</label></li><li data-automation-id="progressBarInactiveStep"><div><div color="#381360"></div><div><div></div></div><div color="#381360"></div></div><label aria-live="polite">step 2 of 7</label></li><li data-automation-id="progressBarInactiveStep"><div><div color="#381360"></div><div><div></div></div><div color="#381360"></div></div><label aria-live="polite">step 3 of 7</label></li></ol></div><div><div><h3 tabindex="-1">Autofill with Resume</h3><div><abbr>*</abbr> Indicates a required field</div><div data-automation-id="applyFlowAutoFillPage"><div><div data-automation-id="instructionalText">Make completing your job application easier by uploading your resume or CV.</div></div><p></p><div data-automation-id="formField-"><div><div><div>Upload either DOC, DOCX, HTML, PDF, or TXT file types (5MB max)</div><div data-automation-id="resumeUpload"><div><div data-automation-id="file-upload-drop-zone" color="#381360"><div><span><i></i></span></div><div>Drop file here</div><div><div>or</div><button type="button" data-automation-id="select-files" id="input-4"><span>Select file</span></button></div></div><input data-automation-id="file-upload-input-ref" type="file" style="display:none"></div><div id="uploaded"></div></div></div><div></div></div></div></div></div><div data-automation-id="pageFooter"><div><div><button data-automation-id="pageFooterNextButton" font-size="14" height="40">Next</button></div></div></div></div>
+<script>
+  window.__nextClicks = 0;
+  document.querySelector('[data-automation-id="pageFooterNextButton"]').addEventListener('click', function () { window.__nextClicks++; });
+  // emulate Workday's upload: React onChange reads files, renders an item, then resets the input
+  var input = document.querySelector('[data-automation-id="file-upload-input-ref"]');
+  input.addEventListener('change', function () {
+    var f = input.files && input.files[0];
+    if (!f) return;
+    window.__uploaded = (window.__uploaded || 0) + 1;
+    document.getElementById('uploaded').innerHTML = '<div data-automation-id="file-upload-item"><div data-automation-id="file-upload-item-name">' + f.name + '</div><div data-automation-id="file-upload-successful">Successfully Uploaded!</div></div>';
+    input.value = '';
+    try { input.files = new DataTransfer().files; } catch (e) { /* ignore */ }
+  });
+</script>
+</body>
+</html>

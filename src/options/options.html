@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Garry AutoFill — Profile</title>
+  <link rel="icon" href="../../icons/icon32.png">
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <img src="../../icons/icon48.png" alt="" width="28" height="28">
+      <div>
+        <h1>Garry AutoFill</h1>
+        <p>Your application profile — stored only in this browser.</p>
+      </div>
+    </div>
+    <div class="save-state" id="saveState" aria-live="polite">All changes saved</div>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" id="toc" aria-label="Sections"></nav>
+
+    <main id="main">
+      <section class="card" id="sec-files">
+        <h2>Resume &amp; documents</h2>
+        <p class="note">Uploaded automatically to the resume field of each application. Max 8&nbsp;MB each.</p>
+        <div class="files">
+          <div class="file-slot" data-slot="resume">
+            <div class="file-meta"><strong>Resume / CV</strong><span class="file-name" data-role="name">No file</span></div>
+            <div class="file-actions">
+              <label class="btn">Choose file<input type="file" accept=".pdf,.doc,.docx,.rtf,.txt,.odt" hidden data-role="input"></label>
+              <button class="btn ghost" type="button" data-role="remove">Remove</button>
+            </div>
+          </div>
+          <div class="file-slot" data-slot="coverLetter">
+            <div class="file-meta"><strong>Cover letter (file)</strong><span class="file-name" data-role="name">No file</span></div>
+            <div class="file-actions">
+              <label class="btn">Choose file<input type="file" accept=".pdf,.doc,.docx,.rtf,.txt,.odt" hidden data-role="input"></label>
+              <button class="btn ghost" type="button" data-role="remove">Remove</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div id="profileSections"></div>
+
+      <section class="card" id="sec-settings">
+        <h2>Behaviour</h2>
+        <div class="toggles" id="settings"></div>
+      </section>
+
+      <section class="card" id="sec-data">
+        <h2>Backup</h2>
+        <p class="note">Export your profile (including files) to move it to another browser.</p>
+        <div class="row-actions">
+          <button class="btn" type="button" id="exportBtn">Export JSON</button>
+          <label class="btn">Import JSON<input type="file" accept="application/json,.json" hidden id="importInput"></label>
+          <button class="btn danger" type="button" id="clearBtn">Erase everything</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <script src="../shared/profile.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

@@ -1,0 +1,368 @@
+<!doctype html>
+<html>
+<head><title>Apply — Workday emulation</title></head>
+<body>
+<!--
+  Emulates the Workday Candidate Experience apply flow (build 2026.37.x) as documented in the research spec:
+  fkit form fields (formField-<metadataId> / data-fkit-id="<origin>--<metadataId>"), Canvas Kit Select buttons with
+  body-portaled listboxes, UXI prompts (search on Enter keyup, categories, pills), DateInput spinbutton sections,
+  upload drop zone, repeatable panels with add-button, radio groups, checkbox groups, and the page footer.
+  All steps are rendered at once so one test page covers every widget.
+-->
+<header><input id="jobSearch" placeholder="Search for Jobs" data-automation-id="keywordSearchInput"></header>
+<div data-automation-id="applyFlowPage" id="app">
+  <h2 data-automation-id="jobTitleHeading">Senior Software Engineer</h2>
+  <div id="pages"></div>
+  <div data-automation-id="pageFooter"><button data-automation-id="pageFooterBackButton">Back</button><button data-automation-id="pageFooterNextButton">Save and Continue</button></div>
+</div>
+<!-- honeypot as on the auth page -->
+<div data-automation-id="signInContent" style="display:none"><input data-automation-id="beecatcher" name="website"></div>
+
+<script>
+(function () {
+  var uid = 36;
+  var nextUid = function () { return ++uid; };
+  window.__state = {};
+  window.__nextClicks = 0;
+  document.querySelector('[data-automation-id="pageFooterNextButton"]').addEventListener('click', function () { window.__nextClicks++; });
+
+  function h(html) { var t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild; }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+
+  // ---------------------------------------------------------------- field builders
+  function text(origin, md, label, opts) {
+    opts = opts || {};
+    var id = origin + '--' + md;
+    var tag = opts.textarea ? '<textarea id="' + id + '" name="' + md + '"></textarea>' : '<input type="text" id="' + id + '" name="' + md + '" value="' + esc(opts.value || '') + '"' + (opts.required ? ' aria-required="true"' : '') + '>';
+    return '<div data-automation-id="formField-' + md + '" data-fkit-id="' + id + '"><label for="' + id + '">' + label + (opts.required ? '<span><abbr aria-hidden="true">*</abbr></span>' : '') + '</label><div><div><div>' + tag + '</div></div></div></div>';
+  }
+  function select(origin, md, label, options, opts) {
+    opts = opts || {};
+    var id = origin + '--' + md;
+    var cur = opts.value || 'Select One';
+    var lbl = opts.legend ? '<fieldset><legend><div><p><b>' + label + '</b><abbr class="requiredAsterisk">*</abbr></p></div></legend>' : '<label for="' + id + '">' + label + '</label>';
+    return '<div data-automation-id="formField-' + md + '" data-fkit-id="' + id + '">' + lbl +
+      '<div style="position:relative;display:block"><button type="button" id="' + id + '" name="' + md + '" aria-haspopup="listbox" aria-label="' + (opts.legend ? '' : label) + ' ' + cur + ' Required" data-options="' + esc(JSON.stringify(options)) + '" value="">' + cur + '</button>' +
+      '<input type="text" style="display:none" value=""></div>' + (opts.legend ? '</fieldset>' : '') + '</div>';
+  }
+  function prompt(origin, md, label, tree, opts) {
+    opts = opts || {};
+    var id = origin + '--' + md;
+    var cid = 'msc-' + origin + '-' + md;
+    var pills = (opts.selected || []).map(function (s) { return '<li data-automation-id="menuItem"><div data-automation-id="selectedItem"><div data-automation-id="promptOption" data-automation-label="' + esc(s) + '">' + esc(s) + '</div><span data-automation-id="DELETE_charm"></span></div></li>'; }).join('');
+    return '<div data-automation-id="formField-' + md + '" data-fkit-id="' + id + '"><label for="' + id + '">' + label + '</label><div><div data-automation-id="multiSelectContainer" id="' + cid + '" data-uxi-widget-type="multiselect" data-multi="' + (opts.multi ? '1' : '') + '" data-tree="' + esc(JSON.stringify(tree)) + '" tabindex="-1">' +
+      '<ul data-automation-id="selectedItemList" role="listbox" aria-label="items selected">' + pills + '</ul>' +
+      '<div data-automation-id="multiselectInputContainer"><input id="' + id + '" data-uxi-widget-type="selectinput" data-uxi-multiselect-id="' + cid + '" placeholder="Search" autocomplete="off"><span data-automation-id="promptIcon"></span></div></div></div></div>';
+  }
+  function radios(origin, md, label, options) {
+    var id = origin + '--' + md;
+    return '<div data-automation-id="formField-' + md + '" data-fkit-id="' + id + '"><div><fieldset><label id="radio-label-' + md + '">' + label + '<abbr>*</abbr></label><div id="' + id + '" aria-labelledby="radio-label-' + md + '">' +
+      options.map(function (o, i) { var rid = md + '-r' + i; return '<div><div><input type="radio" id="' + rid + '" name="' + md + '" value="' + (o === 'Yes') + '" aria-checked="false"></div><label for="' + rid + '">' + o + '</label></div>'; }).join('') +
+      '</div></fieldset></div></div>';
+  }
+  function checkbox(origin, md, label) {
+    var id = origin + '--' + md;
+    return '<div data-automation-id="formField-' + md + '" data-fkit-id="' + id + '"><label for="' + id + '">' + label + '</label><div><div><input type="checkbox" id="' + id + '" name="' + md + '" aria-checked="false"></div></div></div>';
+  }
+  function checkboxGroup(origin, md, label, options, single) {
+    return '<div data-automation-id="formField-' + md + '" data-fkit-id="' + origin + '--' + md + '"><fieldset><legend><div><p><b>' + label + '</b></p></div></legend><div data-automation-id="' + md + '-CheckboxGroup" data-single="' + (single ? '1' : '') + '"><div class="ReactVirtualized__List" role="grid">' +
+      options.map(function (o, i) { var cid = 'wid' + i + '-' + md; return '<div role="row"><div role="cell"><div><div><input type="checkbox" id="' + cid + '" aria-checked="false"></div><label for="' + cid + '">' + o + '</label></div></div></div>'; }).join('') +
+      '</div></div></fieldset></div>';
+  }
+  function date(origin, md, label, parts) {
+    var id = origin + '--' + md;
+    var sec = function (p, ph) {
+      return '<div id="' + id + '-dateSection' + p + '"><div aria-hidden="true" id="' + id + '-dateSection' + p + '-display" data-automation-id="dateSection' + p + '-display">' + ph + '</div>' +
+        '<input role="spinbutton" id="' + id + '-dateSection' + p + '-input" data-automation-id="dateSection' + p + '-input" aria-label="' + p + '" aria-valuetext="' + ph + '" style="position:absolute;transform:scale(0.01);width:1px" value=""></div>';
+    };
+    var html = parts.map(function (p) { return sec(p, p === 'Month' ? 'MM' : p === 'Day' ? 'DD' : 'YYYY'); }).join('<div>/</div>');
+    return '<div data-automation-id="formField-' + md + '" data-fkit-id="' + id + '"><label>' + label + '</label><div data-automation-id="dateInputWrapper" id="' + id + '" tabindex="-1">' + html + '</div></div>';
+  }
+  function upload(origin, md, heading) {
+    return '<div role="group" aria-labelledby="Resume-CV-section"><h3 id="Resume-CV-section">' + heading + '</h3><div data-automation-id="formField-' + md + '" data-fkit-id="' + origin + '--' + md + '"><div><div data-automation-id="file-upload-drop-zone"><div>Drop files here</div><div><div>or</div><button type="button" data-automation-id="select-files">Select files</button></div></div>' +
+      '<input data-automation-id="file-upload-input-ref" type="file" multiple style="display:none"></div><div class="items"></div></div></div>';
+  }
+  function panelSet(section, label, builder, count) {
+    var slug = label.replace(/ /g, '-');
+    var html = '<div role="group" aria-labelledby="' + slug + '-section" data-section="' + section + '"><h3 id="' + slug + '-section">' + label + '</h3><div class="panels"></div><div><button data-automation-id="add-button" type="button">' + (count ? 'Add Another' : 'Add') + '</button></div></div>';
+    var node = h(html);
+    node.__builder = builder;
+    node.__label = label;
+    for (var i = 0; i < count; i++) addPanel(node);
+    return node;
+  }
+  function addPanel(group) {
+    var n = group.querySelectorAll('.panels > [role="group"]').length + 1;
+    var slug = group.__label.replace(/ /g, '-');
+    var origin = group.getAttribute('data-section') + '-' + nextUid();
+    var p = h('<div role="group" aria-labelledby="' + slug + '-' + n + '-panel"><div><h4 id="' + slug + '-' + n + '-panel">' + group.__label + ' ' + n + '</h4><button type="button">Delete</button></div><div data-fkit-id="' + origin + '--null" style="display:contents">' + group.__builder(origin) + '</div></div>');
+    group.querySelector('.panels').appendChild(p);
+    group.querySelector('[data-automation-id="add-button"]').textContent = 'Add Another';
+    wire(p);
+  }
+
+  // ---------------------------------------------------------------- pages
+  var SOURCE_TREE = [
+    { label: 'Job Board', children: ['Indeed', 'LinkedIn', 'Glassdoor'] },
+    { label: 'Social Media', children: ['Facebook', 'Twitter'] },
+    { label: 'Company Website' },
+    { label: 'Employee Referral' },
+  ];
+  var pages = document.getElementById('pages');
+
+  var myInfo = h('<div data-automation-id="applyFlowMyInfoPage"><h2>My Information</h2></div>');
+  myInfo.innerHTML += '<div role="group" aria-labelledby="Source-section"><h3 id="Source-section">How Did You Hear About Us?</h3>' + prompt('source', 'source', 'How Did You Hear About Us?', SOURCE_TREE) + '</div>';
+  myInfo.innerHTML += radios('previousWorker', 'candidateIsPreviousWorker', 'Have you previously been employed by Bonterra?', ['Yes', 'No']);
+  myInfo.innerHTML += select('country', 'country', 'Country', ['United States of America', 'Canada', 'India'], { value: 'United States of America' });
+  myInfo.innerHTML += '<div role="group" aria-labelledby="Legal-Name-section"><h3 id="Legal-Name-section">Legal Name</h3>' + text('name', 'legalName--firstName', 'First Name', { required: true }) + text('name', 'legalName--lastName', 'Last Name', { required: true }) + checkbox('name', 'preferredCheck', 'I have a preferred name') + '</div>';
+  myInfo.innerHTML += '<div role="group" aria-labelledby="Address-section"><h3 id="Address-section">Address</h3>' + text('address', 'addressLine1', 'Address Line 1') + text('address', 'city', 'City') +
+    select('address', 'countryRegion', 'State', ['Arizona', 'California', 'Colorado']) + text('address', 'postalCode', 'Postal Code') + '</div>';
+  myInfo.innerHTML += text('emailAddress', 'emailAddress', 'Email Address');
+  myInfo.innerHTML += '<div role="group" aria-labelledby="Phone-section"><h3 id="Phone-section">Phone</h3>' + select('phoneNumber', 'phoneType', 'Phone Device Type', ['Home', 'Landline', 'Mobile']) +
+    prompt('phoneNumber', 'countryPhoneCode', 'Country Phone Code', ['United States of America (+1)', 'Canada (+1)'], { selected: ['United States of America (+1)'] }) +
+    text('phoneNumber', 'phoneNumber', 'Phone Number') + text('phoneNumber', 'extension', 'Phone Extension') + '</div>';
+  pages.appendChild(myInfo);
+
+  var myExp = h('<div data-automation-id="applyFlowMyExpPage"><h2>My Experience</h2></div>');
+  pages.appendChild(myExp);
+  myExp.appendChild(panelSet('workExperience', 'Work Experience', function (o) {
+    return text(o, 'jobTitle', 'Job Title', { required: true }) + text(o, 'companyName', 'Company', { required: true }) + text(o, 'location', 'Location') +
+      checkbox(o, 'currentlyWorkHere', 'I currently work here') + date(o, 'startDate', 'From', ['Month', 'Year']) + '<div class="end">' + date(o, 'endDate', 'To', ['Month', 'Year']) + '</div>' +
+      text(o, 'roleDescription', 'Role Description', { textarea: true });
+  }, 1));
+  myExp.appendChild(panelSet('education', 'Education', function (o) {
+    return prompt(o, 'school', 'School or University', ['University of California, Berkeley', 'University of California, Davis', 'Stanford University']) +
+      select(o, 'degree', 'Degree', ['High School Diploma', "Associate's Degree", "Bachelor's Degree", "Master's Degree", 'Doctorate']) +
+      prompt(o, 'fieldOfStudy', 'Field of Study', ['Computer Engineering', 'Computer Science', 'Economics']) + text(o, 'gradeAverage', 'Overall Result (GPA)') +
+      date(o, 'firstYearAttended', 'From', ['Year']) + date(o, 'lastYearAttended', 'To (Actual or Expected)', ['Year']);
+  }, 0));
+  myExp.innerHTML += '<div role="group" aria-labelledby="Skills-section"><h3 id="Skills-section">Skills</h3>' + prompt('skills', 'skills', 'Type to Add Skills', ['JavaScript', 'Java', 'TypeScript', 'React.js', 'Node.js', 'Python (Programming Language)'], { multi: true }) + '</div>';
+  myExp.appendChild(h(upload('resumeAttachments', 'attachments', 'Resume/CV')));
+  myExp.appendChild(panelSet('webAddress', 'Websites', function (o) { return text(o, 'url', 'URL'); }, 0));
+  myExp.innerHTML += '<div role="group" aria-labelledby="Social-Network-URLs-section"><h3 id="Social-Network-URLs-section">Social Network URLs</h3>' + text('socialNetworkAccounts', 'linkedInAccount', 'LinkedIn') + text('socialNetworkAccounts', 'facebookAccount', 'Facebook') + '</div>';
+  // innerHTML += re-parses siblings; re-attach panel builders
+  Array.prototype.forEach.call(myExp.querySelectorAll('[data-section]'), function (g) {
+    var s = g.getAttribute('data-section');
+    g.__label = s === 'workExperience' ? 'Work Experience' : s === 'education' ? 'Education' : 'Websites';
+    g.__builder = s === 'workExperience' ? function (o) {
+      return text(o, 'jobTitle', 'Job Title', { required: true }) + text(o, 'companyName', 'Company', { required: true }) + text(o, 'location', 'Location') +
+        checkbox(o, 'currentlyWorkHere', 'I currently work here') + date(o, 'startDate', 'From', ['Month', 'Year']) + '<div class="end">' + date(o, 'endDate', 'To', ['Month', 'Year']) + '</div>' +
+        text(o, 'roleDescription', 'Role Description', { textarea: true });
+    } : s === 'education' ? function (o) {
+      return prompt(o, 'school', 'School or University', ['University of California, Berkeley', 'University of California, Davis', 'Stanford University']) +
+        select(o, 'degree', 'Degree', ['High School Diploma', "Associate's Degree", "Bachelor's Degree", "Master's Degree", 'Doctorate']) +
+        prompt(o, 'fieldOfStudy', 'Field of Study', ['Computer Engineering', 'Computer Science', 'Economics']) + text(o, 'gradeAverage', 'Overall Result (GPA)') +
+        date(o, 'firstYearAttended', 'From', ['Year']) + date(o, 'lastYearAttended', 'To (Actual or Expected)', ['Year']);
+    } : function (o) { return text(o, 'url', 'URL'); };
+  });
+
+  var questions = h('<div data-automation-id="applyFlowPrimaryQuestionsPage"><h2>Application Questions</h2></div>');
+  questions.innerHTML += select('primaryQuestionnaire', 'q1', 'Are you legally authorized to work in the country where this position is located?', ['Yes', 'No'], { legend: true });
+  questions.innerHTML += select('primaryQuestionnaire', 'q2', 'Will you now or in the future require sponsorship for employment visa status (e.g., H-1B visa status)?', ['Yes', 'No'], { legend: true });
+  questions.innerHTML += '<div data-automation-id="formField-q3" data-fkit-id="primaryQuestionnaire--q3"><fieldset><legend><div><p><b>Why are you interested in working for Bonterra?</b></p></div></legend><textarea id="primaryQuestionnaire--q3"></textarea></fieldset></div>';
+  questions.innerHTML += select('primaryQuestionnaire', 'q4', 'Would you consider relocating for this role?', ['I am local to where the job is posted', 'Yes, I would consider relocating for this role', 'No, I am not able to relocate for this role'], { legend: true });
+  pages.appendChild(questions);
+
+  var vol = h('<div data-automation-id="applyFlowVoluntaryDisclosuresPage"><h2>Voluntary Disclosures</h2></div>');
+  vol.innerHTML += select('personalInfoUS', 'gender', 'Gender', ['Male', 'Female', 'I do not wish to self-identify']);
+  vol.innerHTML += select('personalInfoUS', 'hispanicOrLatino', 'Are you Hispanic or Latino?', ['Yes', 'No']);
+  vol.innerHTML += checkboxGroup('personalInfoUS', 'ethnicityMulti', 'Please select the ethnicity which most accurately describes how you identify yourself', ['American Indian or Alaska Native (United States of America)', 'Asian (United States of America)', 'White (United States of America)', 'I do not wish to answer.']);
+  vol.innerHTML += select('personalInfoUS', 'veteranStatus', 'Veteran Status', ['I am not a protected veteran', 'I identify as one or more of the classifications of protected veteran', 'I do not wish to self-identify']);
+  vol.innerHTML += '<div role="group" aria-labelledby="Terms-section"><h3 id="Terms-section">Terms and Conditions</h3>' + checkbox('termsAndConditions', 'acceptTermsAndAgreements', 'I have read and consent to the terms and conditions') + '</div>';
+  pages.appendChild(vol);
+
+  var selfId = h('<div data-automation-id="applyFlowSelfIdentifyPage"><h2>Self Identify</h2></div>');
+  selfId.innerHTML += text('selfIdentifiedDisabilityData', 'name', 'Name') + date('selfIdentifiedDisabilityData', 'dateSignedOn', 'Date', ['Month', 'Day', 'Year']);
+  selfId.innerHTML += checkboxGroup('selfIdentifiedDisabilityData', 'disabilityStatus', 'Please check one of the boxes below:', ['Yes, I have a disability, or have had one in the past', 'No, I do not have a disability and have not had one in the past', 'I do not want to answer'], true);
+  pages.appendChild(selfId);
+
+  // ---------------------------------------------------------------- behaviours
+  // Canvas Kit Select emulation (mirrors SelectBase in the apply-flow bundle):
+  // menuVisibility closed -> open -> opening (200ms) -> opened; selection/close -> closing (200ms) -> closed.
+  // The listbox stays mounted and the button keeps aria-expanded="true" until "closed".
+  // handleClick: closing/close -> re-open (this is what bit the extension before), closed -> open, otherwise close.
+  var lbCount = 0;
+  window.__cksReopens = 0;
+  function cks(btn) { return btn.__cks || (btn.__cks = { vis: 'closed', timer: null, focused: 0, selected: -1, pop: null, id: 'lb-' + (++lbCount) }); }
+  function cksOptions(btn) { return JSON.parse(btn.getAttribute('data-options')); }
+  function cksRender(btn) {
+    var st = cks(btn);
+    if (st.vis === 'closed') {
+      if (st.pop) st.pop.remove();
+      st.pop = null;
+      btn.removeAttribute('aria-controls');
+      btn.removeAttribute('aria-expanded');
+      return;
+    }
+    btn.setAttribute('aria-expanded', 'true');
+    btn.setAttribute('aria-controls', st.id);
+    if (!st.pop) {
+      var opts = cksOptions(btn);
+      st.pop = h('<div class="cks-popup" style="position: relative"><ul role="listbox" id="' + st.id + '" tabindex="-1"><li role="option" id="' + st.id + '-o0" data-value="" aria-disabled="true">Select One</li>' +
+        opts.map(function (o, i) { return '<li role="option" id="' + st.id + '-o' + (i + 1) + '" data-value="w' + i + '"><div>' + esc(o) + '</div></li>'; }).join('') + '</ul></div>');
+      var ul = st.pop.querySelector('ul');
+      st.pop.addEventListener('click', function (ev) {
+        var li = ev.target.closest('li[role="option"]');
+        if (!li || li.getAttribute('aria-disabled') === 'true') return;
+        ev.preventDefault();
+        cksSelect(btn, Array.prototype.indexOf.call(ul.children, li));
+      });
+      ul.addEventListener('keydown', function (ev) {
+        var n = ul.children.length;
+        if (ev.key === 'ArrowDown') { st.focused = Math.min(n - 1, st.focused + 1); } else if (ev.key === 'ArrowUp') { st.focused = Math.max(0, st.focused - 1); } else if (ev.key === 'Enter') { if (st.vis !== 'closed' && st.vis !== 'closing') cksSelect(btn, st.focused); } else if (ev.key === 'Escape') { cksToggle(btn, false); btn.focus(); } else return;
+        ul.setAttribute('aria-activedescendant', ul.children[st.focused].id);
+      });
+      document.body.appendChild(st.pop);
+      ul.focus();
+    }
+    st.pop.querySelector('ul').setAttribute('aria-activedescendant', st.id + '-o' + st.focused);
+  }
+  function cksSet(btn, v) { cks(btn).vis = v; cksRender(btn); }
+  function cksOpenMenu(btn) {
+    var st = cks(btn);
+    cksSet(btn, 'opening');
+    clearTimeout(st.timer);
+    st.timer = setTimeout(function () { cksSet(btn, 'opened'); }, 200);
+  }
+  function cksCloseMenu(btn) {
+    var st = cks(btn);
+    cksSet(btn, 'closing');
+    clearTimeout(st.timer);
+    st.timer = setTimeout(function () { st.focused = Math.max(0, st.selected); cksSet(btn, 'closed'); }, 200);
+  }
+  function cksToggle(btn, open) {
+    var v = cks(btn).vis;
+    if (open) {
+      if (v === 'closed') { cksSet(btn, 'open'); cksOpenMenu(btn); } else if (v === 'close' || v === 'closing') { window.__cksReopens++; cksOpenMenu(btn); }
+    } else if (v === 'opened') { cksSet(btn, 'close'); cksCloseMenu(btn); } else if (v === 'open' || v === 'opening') cksCloseMenu(btn);
+  }
+  function cksSelect(btn, index) {
+    var st = cks(btn);
+    var label = index === 0 ? 'Select One' : cksOptions(btn)[index - 1];
+    st.selected = index;
+    cksToggle(btn, false);
+    btn.focus();
+    // fireChangeEvent -> React form state -> re-render with the new label
+    setTimeout(function () {
+      btn.textContent = label;
+      btn.setAttribute('aria-label', (btn.getAttribute('aria-label') || '').replace(/ (Select One|[^ ].*?) Required$/, '') + ' ' + label + ' Required');
+      window.__state[btn.id] = label;
+    }, 30);
+  }
+
+  document.addEventListener('mousedown', function (e) {
+    // Popper onClose: outside mousedown closes open menus
+    Array.prototype.forEach.call(document.querySelectorAll('button[aria-haspopup="listbox"][aria-expanded="true"]'), function (b) {
+      var st = cks(b);
+      if (st.pop && !st.pop.contains(e.target) && e.target !== b && (st.vis === 'opened' || st.vis === 'opening')) cksToggle(b, false);
+    });
+  });
+
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest && e.target.closest('button[aria-haspopup="listbox"]');
+    if (btn) {
+      var v = cks(btn).vis;
+      if (v === 'close' || v === 'closing' || v === 'closed') cksToggle(btn, true); else cksToggle(btn, false);
+      return;
+    }
+    var addBtn = e.target.closest && e.target.closest('[data-automation-id="add-button"]');
+    if (addBtn) { addPanel(addBtn.closest('[data-section]')); return; }
+  });
+
+  function wire(root) {
+    Array.prototype.forEach.call(root.querySelectorAll('input[data-uxi-widget-type="selectinput"]'), wirePrompt);
+    Array.prototype.forEach.call(root.querySelectorAll('[data-automation-id="dateInputWrapper"]'), wireDate);
+    Array.prototype.forEach.call(root.querySelectorAll('input[data-automation-id="file-upload-input-ref"]'), wireUpload);
+    Array.prototype.forEach.call(root.querySelectorAll('input[id$="--currentlyWorkHere"]'), function (cb) {
+      cb.addEventListener('change', function () { var end = cb.closest('[data-fkit-id$="--null"]').querySelector('.end'); if (end) end.style.display = cb.checked ? 'none' : ''; });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-single="1"]'), function (grp) {
+      grp.addEventListener('change', function () {
+        var boxes = grp.querySelectorAll('input[type="checkbox"]');
+        var any = Array.prototype.some.call(boxes, function (b) { return b.checked; });
+        Array.prototype.forEach.call(boxes, function (b) { b.disabled = any && !b.checked; });
+      });
+    });
+  }
+
+  function leafLabel(item) { return typeof item === 'string' ? item : item.label; }
+
+  function wirePrompt(inp) {
+    var container = document.getElementById(inp.getAttribute('data-uxi-multiselect-id'));
+    var tree = JSON.parse(container.getAttribute('data-tree'));
+    var multi = container.getAttribute('data-multi') === '1';
+    var sawEnter = false;
+    function popup() { return document.querySelector('[data-automation-id="responsiveMonikerPrompt"][data-associated-widget="' + container.id + '"]'); }
+    function close() { var p = popup(); if (p) p.remove(); }
+    function select(label) {
+      var ul = container.querySelector('[data-automation-id="selectedItemList"]');
+      if (!multi) ul.innerHTML = '';
+      ul.insertAdjacentHTML('beforeend', '<li data-automation-id="menuItem"><div data-automation-id="selectedItem"><div data-automation-id="promptOption" data-automation-label="' + esc(label) + '">' + esc(label) + '</div></div></li>');
+      window.__state[inp.id] = (multi ? (window.__state[inp.id] || []).concat(label) : label);
+      inp.value = '';
+      if (!multi) close();
+    }
+    function render(items, title) {
+      close();
+      var p = h('<div data-associated-widget="' + container.id + '" data-automation-id="responsiveMonikerPrompt" data-uxi-widget-type="prompt"><div data-automation-id="multiSelectHeader">' + (title ? '<button data-automation-id="backButton" type="button"></button>' : '') + '<div data-automation-id="promptTitle">' + (title || 'All') + '</div></div><div role="listbox" data-automation-id="activeListContainer"></div></div>');
+      var list = p.querySelector('[role="listbox"]');
+      if (!items.length) list.innerHTML = '<div>No matches found</div>';
+      items.forEach(function (it, i) {
+        var isCat = typeof it !== 'string' && it.children;
+        var row = h('<div data-automation-id="menuItem" role="option" id="menuItem-' + i + '"><div data-automation-id="promptLeafNode">' + (isCat ? '' : (multi ? '<div data-automation-id="checkbox"></div>' : '<div data-automation-id="radioBtn"></div>')) +
+          '<div data-automation-id="promptOption" data-automation-label="' + esc(leafLabel(it)) + '">' + esc(leafLabel(it)) + '</div>' + (isCat ? '<span data-automation-id="chevron"></span>' : '') + '</div></div>');
+        row.querySelector('[data-automation-id="promptLeafNode"]').addEventListener('click', function () {
+          if (isCat) setTimeout(function () { render(it.children, it.label); }, 40); else select(leafLabel(it));
+        });
+        list.appendChild(row);
+      });
+      var back = p.querySelector('[data-automation-id="backButton"]');
+      if (back) back.addEventListener('click', function () { setTimeout(function () { render(tree, ''); }, 40); });
+      document.body.appendChild(p);
+    }
+    function flatten(items) { var out = []; items.forEach(function (it) { if (typeof it !== 'string' && it.children) out = out.concat(it.children); else out.push(leafLabel(it)); }); return out; }
+    inp.addEventListener('click', function () { setTimeout(function () { render(tree, ''); }, 40); });
+    inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') sawEnter = true; if (e.key === 'Escape') close(); });
+    inp.addEventListener('keyup', function (e) {
+      if (e.key !== 'Enter' || !sawEnter) return;
+      sawEnter = false;
+      var qv = inp.value.trim().toLowerCase();
+      setTimeout(function () {
+        if (!qv) { render(tree, ''); return; }
+        var hits = flatten(tree).filter(function (l) { return l.toLowerCase().indexOf(qv) >= 0; });
+        if (hits.length === 1 && !multi) { select(hits[0]); return; }
+        render(hits, 'Search Results (' + hits.length + ')');
+      }, 60);
+    });
+  }
+
+  function wireDate(wrap) {
+    wrap.addEventListener('input', function (e) {
+      var inp = e.target;
+      var disp = document.getElementById(inp.id.replace(/-input$/, '-display'));
+      if (disp && /^\d+$/.test(inp.value)) { disp.textContent = inp.value; inp.setAttribute('aria-valuenow', String(parseInt(inp.value, 10))); }
+    });
+    wrap.addEventListener('focusout', function (e) {
+      if (e.relatedTarget && wrap.contains(e.relatedTarget)) return;
+      var vals = Array.prototype.map.call(wrap.querySelectorAll('input'), function (i) { return i.value; });
+      window.__state[wrap.id] = vals.join('/');
+    });
+  }
+
+  function wireUpload(input) {
+    input.addEventListener('change', function () {
+      var f = input.files && input.files[0];
+      if (!f) return;
+      window.__uploads = (window.__uploads || 0) + 1;
+      var items = input.closest('[data-automation-id^="formField-"]').querySelector('.items');
+      items.innerHTML = '<div data-automation-id="file-upload-item"><div data-automation-id="file-upload-item-name">' + esc(f.name) + '</div><div data-automation-id="file-upload-successful">Successfully Uploaded!</div></div>';
+      input.value = '';
+      try { input.files = new DataTransfer().files; } catch (e) { /* ignore */ }
+    });
+  }
+
+  wire(document);
+})();
+</script>
+</body>
+</html>

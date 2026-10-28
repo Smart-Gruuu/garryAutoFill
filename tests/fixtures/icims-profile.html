@@ -1,0 +1,236 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Candidate Profile - Software Engineer L4 (Remote)</title>
+<style>
+  .dropdown-hide, .dropdown-invisible { display: none; }
+  .dropdown-select { display: inline-block; min-width: 200px; border: 1px solid #999; padding: 4px; cursor: pointer; }
+</style>
+</head>
+<body>
+<!--
+  Structure mirrors a real iCIMS classic-portal candidate profile iframe (archived 2026-08): iCIMS_TableRow rows,
+  label_<id> labels, "-1_PersonProfileFields.*" collections, rcf#### custom questions, Login/Password for new
+  accounts inside the same form, and the resume input whose onchange submits the form with &uploadResume=1.
+  The dropdown widget below is an emulation written from the widget's documented behaviour (not iCIMS code):
+  hidden <select class="dropdown-hide">, a.dropdown-select[role=combobox] opened by document mousedown,
+  search box keyup (AJAX lists: 25 options per page, 500ms debounce), click on li.result-selectable.
+-->
+<div class="iCIMS_MainWrapper">
+<form id="profileForm" name="profileForm" method="post" enctype="multipart/form-data" action="/jobs/4163/software-engineer-l4-%28remote%29/candidate?from=login&amp;in_iframe=1">
+  <input type="hidden" name="PortalProfileFields.Resume" id="PortalProfileFields.Resume" value="false">
+  <input type="hidden" name="PortalProfileFields.Resume_FileName" id="PortalProfileFields.Resume_FileName" value="">
+  <div class="iCIMS_TableRow"><label id="label_PortalProfileFields.Resume_File" for="PortalProfileFields.Resume_File">Error:Please upload your resume (Max size: 5 MB)</label></div>
+  <div id="PortalProfileFields.Resume_UploadButtons" class="upload-buttons">
+    <div class="iCIMS_FileUploadButtonBlock localButton"><div tabindex="0" class="iCIMS_FileFieldButton iCIMS_SecondaryButton iCIMS_resumeUpload">
+      <label for="PortalProfileFields.Resume_File" id="label_for_PortalProfileFields.Resume_File" aria-hidden="true" class="iCIMS_508_Label">My Computer (Opens new window)</label>
+      <input type="file" id="PortalProfileFields.Resume_File" name="PortalProfileFields.Resume_File" tabindex="-1" style="opacity:0;position:absolute;width:1px;height:1px"
+        aria-labelledby="label_for_PortalProfileFields.Resume_File label_PortalProfileFields.Resume_File" aria-required="true"
+        onchange="pageDirtyFlag=true;icims_setFileFieldValue('PortalProfileFields.Resume', document.getElementById('PortalProfileFields.Resume_File').value, '', '', false, 'local');window.document.body.onbeforeunload = null;this.form.action=this.form.action+'&amp;uploadResume=1';this.form.submit();">
+      <span class="iCIMS_FileFieldIcon"></span>
+    </div></div>
+    <div id="resumeStatus"></div>
+    <button id="PortalProfileFields.Resume_Button" type="button" style="display:none" class="iCIMS_DeleteButton">Delete</button>
+  </div>
+  <input type="submit" class="iCIMS_SecondaryButton" name="uploadResume" value="Submit Resume">
+
+  <div class="iCIMS_ProfileFormTable iCIMS_Table">
+    <div class="iCIMS_TableRow"><div class="iCIMS_InfoField"><label tabindex="-1" id="label_PersonProfileFields.Login" for="PersonProfileFields.Login">Login (Recommend using email address)</label><span class="Field_Required"><span class="Field_RequiredStar">* </span></span></div>
+      <div class="iCIMS_InfoData"><input type="text" id="PersonProfileFields.Login" name="PersonProfileFields.Login" class="iCIMS_Forms_Global iCIMS_Forms_TextField form-control" aria-required="true" autocomplete="username"></div></div>
+    <div class="iCIMS_TableRow"><div class="iCIMS_InfoField"><label tabindex="-1" id="label_PersonProfileFields.Password" for="PersonProfileFields.Password">Password</label></div>
+      <div class="iCIMS_InfoData"><input type="password" autocomplete="new-password" id="PersonProfileFields.Password" name="PersonProfileFields.Password" class="iCIMS_Forms_Global iCIMS_Forms_PasswordField form-control"></div></div>
+    <div class="iCIMS_TableRow"><div class="iCIMS_InfoField"><label tabindex="-1" id="label_PersonProfileFields.Password_Confirm" for="PersonProfileFields.Password_Confirm">Password (Re-enter)</label></div>
+      <div class="iCIMS_InfoData"><input type="password" autocomplete="new-password" id="PersonProfileFields.Password_Confirm" name="PersonProfileFields.Password_Confirm" class="iCIMS_Forms_Global iCIMS_Forms_PasswordField form-control"></div></div>
+  </div>
+
+  <div class="iCIMS_ProfileFormTable iCIMS_Table">
+    <div class="iCIMS_TableRow"><div class="iCIMS_InfoField"><label tabindex="-1" id="label_rcf2095" for="rcf2095">Preferred First Name</label></div>
+      <div class="iCIMS_InfoData"><input type="text" id="rcf2095" name="rcf2095" class="iCIMS_Forms_Global iCIMS_Forms_TextField form-control"></div></div>
+    <div class="iCIMS_TableRow"><div class="iCIMS_InfoField"><label tabindex="-1" id="label_PersonProfileFields.FirstName" for="PersonProfileFields.FirstName">First Name</label><span class="Field_Required"><span class="Field_RequiredStar">* </span></span></div>
+      <div class="iCIMS_InfoData"><input type="text" id="PersonProfileFields.FirstName" name="PersonProfileFields.FirstName" class="iCIMS_Forms_Global iCIMS_Forms_TextField form-control" aria-required="true" autocomplete="given-name"></div></div>
+    <div class="iCIMS_TableRow"><div class="iCIMS_InfoField"><label tabindex="-1" id="label_PersonProfileFields.MiddleName" for="PersonProfileFields.MiddleName">Middle Name</label></div>
+      <div class="iCIMS_InfoData"><input type="text" id="PersonProfileFields.MiddleName" name="PersonProfileFields.MiddleName" class="iCIMS_Forms_Global iCIMS_Forms_TextField form-control"></div></div>
+    <div class="iCIMS_TableRow"><div class="iCIMS_InfoField"><label tabindex="-1" id="label_PersonProfileFields.LastName" for="PersonProfileFields.LastName">Last Name</label></div>
+      <div class="iCIMS_InfoData"><input type="text" id="PersonProfileFields.LastName" name="PersonProfileFields.LastName" class="iCIMS_Forms_Global iCIMS_Forms_TextField form-control" aria-required="true"></div></div>
+    <div class="iCIMS_TableRow"><div class="iCIMS_InfoField"><label tabindex="-1" id="label_PersonProfileFields.Email" for="PersonProfileFields.Email">Email</label></div>
+      <div class="iCIMS_InfoData"><input type="email" id="PersonProfileFields.Email" name="PersonProfileFields.Email" class="iCIMS_Forms_Global iCIMS_Forms_EmailField form-control" aria-required="true"></div></div>
+  </div>
+
+  <fieldset class="iCIMS_CollectionGroup"><legend><span class="iCIMS_LabelText" id="PersonProfileFields.Phones_-1_label">Phones (1)</span></legend>
+    <div data-collection="PersonProfileFields.Phones" data-index="1" class="iCIMS_TableRow">
+      <div class="iCIMS_InfoField iCIMS_CollectionField"><label id="label_-1_PersonProfileFields.PhoneType" for="-1_PersonProfileFields.PhoneType"><span class="iCIMS_LabelText">Type</span></label></div>
+      <div class="iCIMS_InfoData"><select id="-1_PersonProfileFields.PhoneType" name="-1_PersonProfileFields.PhoneType" data-label="Type" class="iCIMS_Forms_Global iCIMS_Forms_ListEditorField form-control" aria-label="Type" icimsdropdown-enabled="0" icimsdropdown-ajax="1" icimsdropdown-search="0"><option value=""></option><option value="3026">Cell Phone</option><option value="3027">Landline/Home Phone</option></select></div>
+      <div class="iCIMS_InfoField iCIMS_CollectionField"><label id="label_-1_PersonProfileFields.PhoneNumber" for="-1_PersonProfileFields.PhoneNumber"><span class="iCIMS_LabelText">Number</span></label></div>
+      <div class="iCIMS_InfoData"><input type="text" id="-1_PersonProfileFields.PhoneNumber" name="-1_PersonProfileFields.PhoneNumber" class="iCIMS_Forms_Global iCIMS_Forms_TextField form-control"></div>
+    </div>
+  </fieldset>
+
+  <fieldset class="iCIMS_CollectionGroup"><legend><span class="iCIMS_LabelText" id="PersonProfileFields.Addresses_-1_label">Addresses (1)</span></legend>
+    <div data-collection="PersonProfileFields.Addresses" data-index="1" class="iCIMS_TableRow">
+      <div class="iCIMS_InfoField"><label id="label_-1_PersonProfileFields.AddressType" for="-1_PersonProfileFields.AddressType"><span class="iCIMS_LabelText">Type</span></label></div>
+      <div class="iCIMS_InfoData"><select id="-1_PersonProfileFields.AddressType" name="-1_PersonProfileFields.AddressType" data-label="Type" class="iCIMS_Forms_Global form-control" aria-label="Type" icimsdropdown-enabled="0"><option value=""></option><option value="3030">Home</option><option value="3031">Other</option></select></div>
+      <div class="iCIMS_InfoField"><label id="label_-1_PersonProfileFields.AddressStreet1" for="-1_PersonProfileFields.AddressStreet1"><span class="iCIMS_LabelText">Address</span></label></div>
+      <div class="iCIMS_InfoData"><input type="text" id="-1_PersonProfileFields.AddressStreet1" name="-1_PersonProfileFields.AddressStreet1" class="iCIMS_Forms_Global form-control"></div>
+      <div class="iCIMS_InfoField"><label id="label_-1_PersonProfileFields.AddressStreet2" for="-1_PersonProfileFields.AddressStreet2"><span class="iCIMS_LabelText">Apartment/Unit Number</span></label></div>
+      <div class="iCIMS_InfoData"><input type="text" id="-1_PersonProfileFields.AddressStreet2" name="-1_PersonProfileFields.AddressStreet2" class="iCIMS_Forms_Global form-control"></div>
+      <div class="iCIMS_InfoField"><label id="label_-1_PersonProfileFields.AddressCity" for="-1_PersonProfileFields.AddressCity"><span class="iCIMS_LabelText">City</span></label></div>
+      <div class="iCIMS_InfoData"><input type="text" id="-1_PersonProfileFields.AddressCity" name="-1_PersonProfileFields.AddressCity" class="iCIMS_Forms_Global form-control"></div>
+      <div class="iCIMS_InfoField"><label id="label_-1_PersonProfileFields.AddressZip" for="-1_PersonProfileFields.AddressZip"><span class="iCIMS_LabelText">Zip/Postal Code</span></label></div>
+      <div class="iCIMS_InfoData"><input type="text" id="-1_PersonProfileFields.AddressZip" name="-1_PersonProfileFields.AddressZip" class="iCIMS_Forms_Global form-control"></div>
+      <div class="iCIMS_InfoField"><label id="label_-1_PersonProfileFields.AddressCountry" for="-1_PersonProfileFields.AddressCountry"><span class="iCIMS_LabelText">Country</span></label></div>
+      <div class="iCIMS_InfoData"><select id="-1_PersonProfileFields.AddressCountry" name="-1_PersonProfileFields.AddressCountry" data-label="Country" class="iCIMS_Forms_Global iCIMS_Forms_IdDropDown form-control" aria-labelledby="label_-1_PersonProfileFields.AddressCountry" icimsdropdown-enabled="1" icimsdropdown-ajax="1" icimsdropdown-search="1" onchange="window.__changes.push(this.id)"><option></option></select></div>
+      <div class="iCIMS_InfoField"><label id="label_-1_PersonProfileFields.AddressState" for="-1_PersonProfileFields.AddressState"><span class="iCIMS_LabelText">State/Province</span></label></div>
+      <div class="iCIMS_InfoData"><select id="-1_PersonProfileFields.AddressState" name="-1_PersonProfileFields.AddressState" data-label="State/Province" data-ddd-parent-link="AddressCountry" class="iCIMS_Forms_Global iCIMS_Forms_IdDropDown form-control" aria-labelledby="label_-1_PersonProfileFields.AddressState" icimsdropdown-enabled="1" icimsdropdown-ajax="1" icimsdropdown-search="1" onchange="window.__changes.push(this.id)"><option></option></select></div>
+    </div>
+  </fieldset>
+
+  <div class="iCIMS_ProfileFormTable iCIMS_Table">
+    <div class="iCIMS_TableRow"><div class="iCIMS_InfoField"><label tabindex="-1" id="label_rcf3048" for="rcf3048">How did you hear about us?</label></div>
+      <div class="iCIMS_InfoData"><select id="rcf3048" name="rcf3048" data-label="How did you hear about us?" class="iCIMS_Forms_Global iCIMS_Forms_DropDown form-control" icimsdropdown-enabled="0"><option value="">&#8212; Make a Selection &#8212;</option><option value="1">Company Website</option><option value="2">Employee Referral</option><option value="3">Job Board</option><option value="4">LinkedIn</option><option value="5">Other</option></select></div></div>
+    <div class="iCIMS_TableRow"><div class="iCIMS_InfoField"><label tabindex="-1" id="label_rcf2065" for="rcf2065">If you are currently a federal government employee, please contact your ethics office to clarify if there are any restrictions on your job search.</label></div>
+      <div class="iCIMS_InfoData"><input type="text" id="rcf2065" name="rcf2065" class="iCIMS_Forms_Global form-control" aria-required="true" maxlength="100"></div></div>
+    <div class="iCIMS_TableRow"><div class="iCIMS_InfoField"><label tabindex="-1" id="label_rcf2044" for="rcf2044">Have you previously been employed by Frontdoor? (e.g., temp, contractor, or employee)</label></div>
+      <div class="iCIMS_InfoData"><select id="rcf2044" name="rcf2044" data-label="Have you previously been employed by Frontdoor? (e.g., temp, contractor, or employee)" class="iCIMS_Forms_Global form-control" icimsdropdown-enabled="1" icimsdropdown-ajax="1" icimsdropdown-search="0" onchange="window.__changes.push(this.id)"><option></option></select></div></div>
+    <div class="iCIMS_TableRow"><div class="iCIMS_InfoField"><label tabindex="-1" id="label_rcf2049" for="rcf2049">If your name has changed since your previous Frontdoor employment, please list your former name here.</label></div>
+      <div class="iCIMS_InfoData"><input type="text" id="rcf2049" name="rcf2049" class="iCIMS_Forms_Global form-control"></div></div>
+    <div class="iCIMS_TableRow"><div class="iCIMS_InfoField"><label tabindex="-1" id="label_rcf2035" for="rcf2035">What are your salary expectations?</label></div>
+      <div class="iCIMS_InfoData"><input type="text" id="rcf2035" name="rcf2035" class="iCIMS_Forms_Global form-control" aria-required="true" maxlength="25"></div></div>
+    <div class="iCIMS_TableRow"><div class="iCIMS_InfoField"><label tabindex="-1" id="label_rcf3180" for="rcf3180">Are you willing to relocate?</label></div>
+      <div class="iCIMS_InfoData"><select id="rcf3180" name="rcf3180" data-label="Are you willing to relocate?" class="iCIMS_Forms_Global form-control" icimsdropdown-enabled="1" icimsdropdown-ajax="1" icimsdropdown-search="0"><option></option></select></div></div>
+    <div class="iCIMS_TableRow"><div class="iCIMS_InfoField"><label tabindex="-1" id="label_rcf3077" for="rcf3077">Time Zone</label></div>
+      <div class="iCIMS_InfoData"><select id="rcf3077" name="rcf3077" data-label="Time Zone" class="iCIMS_Forms_Global form-control" icimsdropdown-enabled="1" icimsdropdown-ajax="1" icimsdropdown-search="1"><option></option></select></div></div>
+    <div class="iCIMS_TableRow"><div class="iCIMS_InfoField"><label tabindex="-1" id="label_rcf3100" for="rcf3100">Why are you interested in joining Frontdoor?</label></div>
+      <div class="iCIMS_InfoData"><textarea id="rcf3100" name="rcf3100" class="iCIMS_Forms_Global form-control"></textarea></div></div>
+  </div>
+
+  <fieldset class="iCIMS_CollectionGroup"><legend><span class="iCIMS_LabelText">References (1)</span></legend>
+    <div data-collection="PersonProfileFields.References" data-index="1" class="iCIMS_TableRow">
+      <label id="label_-1_PersonProfileFields.rcf3281" for="-1_PersonProfileFields.rcf3281"><span class="iCIMS_LabelText">Reference First Name</span></label><input type="text" id="-1_PersonProfileFields.rcf3281" name="-1_PersonProfileFields.rcf3281">
+      <label id="label_-1_PersonProfileFields.rcf3282" for="-1_PersonProfileFields.rcf3282"><span class="iCIMS_LabelText">Reference Last Name</span></label><input type="text" id="-1_PersonProfileFields.rcf3282" name="-1_PersonProfileFields.rcf3282">
+      <label id="label_-1_PersonProfileFields.rcf3283" for="-1_PersonProfileFields.rcf3283"><span class="iCIMS_LabelText">Reference Email</span></label><input type="email" id="-1_PersonProfileFields.rcf3283" name="-1_PersonProfileFields.rcf3283">
+      <label id="label_-1_PersonProfileFields.rcf3284" for="-1_PersonProfileFields.rcf3284"><span class="iCIMS_LabelText">Reference Phone</span></label><input type="text" id="-1_PersonProfileFields.rcf3284" name="-1_PersonProfileFields.rcf3284">
+      <label id="label_-1_PersonProfileFields.rcf3285" for="-1_PersonProfileFields.rcf3285"><span class="iCIMS_LabelText">Reference Company</span></label><input type="text" id="-1_PersonProfileFields.rcf3285" name="-1_PersonProfileFields.rcf3285">
+    </div>
+  </fieldset>
+
+  <div class="iCIMS_TableRow"><input type="submit" id="cp_form_submit_i" class="iCIMS_PrimaryButton" name="profileButton" value="Submit Profile"></div>
+</form>
+</div>
+
+<script>
+(function () {
+  window.pageDirtyFlag = false;
+  window.__changes = [];
+  window.__formSubmits = 0;
+  window.__submitEvents = 0;
+  window.__submitClicks = 0;
+  var form = document.getElementById('profileForm');
+  form.addEventListener('submit', function () { window.__submitEvents++; });
+  document.getElementById('cp_form_submit_i').addEventListener('click', function () { window.__submitClicks++; });
+  if (window.__GAF_TEST__) {
+    // jsdom has no navigation: record programmatic submissions instead
+    HTMLFormElement.prototype.submit = function () { window.__formSubmits++; window.__submittedAction = this.getAttribute('action') || this.action; };
+  }
+
+  window.icims_setFileFieldValue = function (id, value) {
+    document.getElementById(id + '_FileName').value = String(value || '').split(/[\\/]/).pop();
+  };
+
+  // After iCIMS parses an uploaded resume it re-renders the profile with the file attached
+  if (/[?&]uploadResume=1/.test(location.search)) {
+    document.getElementById('PortalProfileFields.Resume').value = 'true';
+    document.getElementById('PortalProfileFields.Resume_FileName').value = 'Jordan_Rivera_Resume.pdf';
+    document.getElementById('resumeStatus').textContent = 'Jordan_Rivera_Resume.pdf';
+    document.getElementById('PortalProfileFields.Resume_Button').style.display = '';
+  }
+
+  // ------------------------------------------------------------------ data for AJAX dropdowns
+  var COUNTRIES = ['Afghanistan', 'Albania', 'Algeria', 'Argentina', 'Australia', 'Austria', 'Belgium', 'Brazil', 'Bulgaria', 'Canada', 'Chile', 'China', 'Colombia', 'Croatia', 'Denmark', 'Egypt', 'Finland', 'France', 'Germany', 'Greece', 'India', 'Ireland', 'Israel', 'Italy', 'Japan', 'Mexico', 'Netherlands', 'Norway', 'Poland', 'Portugal', 'Spain', 'Sweden', 'Switzerland', 'United Kingdom', 'United States'];
+  var STATES = { 'United States': ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'Texas', 'Washington'], 'Canada': ['Alberta', 'British Columbia', 'Ontario'] };
+  var DATA = {
+    '-1_PersonProfileFields.AddressCountry': function () { return COUNTRIES; },
+    '-1_PersonProfileFields.AddressState': function () {
+      var c = document.getElementById('-1_PersonProfileFields.AddressCountry');
+      var o = c.options[c.selectedIndex];
+      return (o && STATES[o.textContent]) || [];
+    },
+    'rcf2044': function () { return ['Yes', 'No']; },
+    'rcf3180': function () { return ['Yes', 'No']; },
+    'rcf3077': function () { return ['Eastern', 'Central', 'Mountain', 'Pacific']; },
+  };
+
+  // ------------------------------------------------------------------ widget emulation
+  function el(tag, attrs, html) { var n = document.createElement(tag); for (var k in attrs) n.setAttribute(k, attrs[k]); if (html != null) n.innerHTML = html; return n; }
+  var PLACEHOLDER = '<span class="dropdown-placeholder">&#8212; Make a Selection &#8212;</span>';
+
+  Array.prototype.forEach.call(document.querySelectorAll('select[icimsdropdown-enabled="1"]'), function (list) {
+    var search = list.getAttribute('icimsdropdown-search') !== '0';
+    var open = false; var inputWord = ''; var timer = null; var words = [];
+    list.classList.add('dropdown-hide');
+    var fake = el('a', { id: list.id + '_icimsDropdown', 'class': 'dropdown-select', role: 'combobox', 'aria-expanded': 'false', tabindex: '0', 'aria-label': list.getAttribute('data-label') || '' });
+    var text = el('span', { id: list.id + '_fakeSelected_icimsDropdown', 'class': 'dropdown-text' }, PLACEHOLDER);
+    fake.appendChild(text);
+    list.parentNode.insertBefore(fake, list.nextSibling);
+    var container = el('div', { id: fake.id + '_ctnr', 'class': 'dropdown-container dropdown-invisible', 'aria-expanded': 'false' });
+    var box = el('input', { type: 'text', 'class': 'dropdown-search' + (search ? '' : ' dropdown-invisible'), role: 'combobox', placeholder: '— Type to Search —' });
+    if (!search) box.setAttribute('aria-hidden', 'true');
+    var ul = el('ul', { id: list.id + '_dropdown-results', role: 'listbox' });
+    container.appendChild(box); container.appendChild(ul);
+    fake.parentNode.insertBefore(container, fake.nextSibling);
+
+    function render(all) {
+      words = all.slice(0, 25);
+      ul.innerHTML = '';
+      words.forEach(function (w, i) {
+        ul.appendChild(el('li', { id: 'result-selectable_' + list.id + '_' + i, 'class': 'dropdown-result result-selectable', role: 'option', 'dropdown-index': String(i), title: w, 'aria-label': w }, w));
+      });
+    }
+    function load(q) {
+      setTimeout(function () {
+        var all = DATA[list.id]();
+        if (q) all = all.filter(function (w) { return w.toLowerCase().indexOf(q.toLowerCase()) >= 0; });
+        render(all);
+      }, 120);
+    }
+    function expand() { open = true; container.classList.remove('dropdown-invisible'); fake.setAttribute('aria-expanded', 'true'); inputWord = ''; box.value = ''; ul.innerHTML = ''; load(''); }
+    function collapse() { open = false; container.classList.add('dropdown-invisible'); fake.setAttribute('aria-expanded', 'false'); }
+
+    document.addEventListener('mousedown', function (e) {
+      var t = e.target;
+      if (t === fake || fake.contains(t)) { if (open) collapse(); else expand(); e.stopPropagation(); e.preventDefault(); }
+      else if (open && !container.contains(t)) collapse();
+    });
+    box.addEventListener('keyup', function () {
+      if (box.value === inputWord) return;
+      inputWord = box.value;
+      clearTimeout(timer);
+      timer = setTimeout(function () { load(inputWord); }, 500);
+    });
+    box.addEventListener('click', function (e) { e.stopPropagation(); });
+    ul.addEventListener('click', function (e) {
+      var li = e.target.closest('li.result-selectable');
+      if (!li) return;
+      var w = words[Number(li.getAttribute('dropdown-index'))];
+      text.innerHTML = w;
+      list.options.length = 0;
+      var opt = document.createElement('option');
+      opt.value = 'id-' + w; opt.textContent = w; opt.selected = true;
+      list.appendChild(opt);
+      list.selectedIndex = 0;
+      collapse();
+      if (typeof list.onchange === 'function') list.onchange();
+      // dependent dropdowns reset when their parent changes
+      Array.prototype.forEach.call(document.querySelectorAll('select[data-ddd-parent-link]'), function (child) {
+        if (list.id.indexOf(child.getAttribute('data-ddd-parent-link')) >= 0) {
+          child.options.length = 0; child.appendChild(document.createElement('option'));
+          document.getElementById(child.id + '_fakeSelected_icimsDropdown').innerHTML = PLACEHOLDER;
+        }
+      });
+      e.stopPropagation();
+    });
+  });
+})();
+</script>
+</body>
+</html>

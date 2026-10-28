@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Garry AutoFill</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <img src="../../icons/icon32.png" alt="" width="22" height="22">
+    <strong>Garry AutoFill</strong>
+    <button class="link" id="openOptions" type="button">Profile</button>
+  </header>
+
+  <div class="warn" id="emptyProfile" hidden>
+    Your profile is empty. <button class="link" type="button" id="setupProfile">Set it up</button> once and every application gets faster.
+  </div>
+
+  <section class="detect">
+    <div class="site" id="site">Checking this page…</div>
+    <div class="sub" id="siteSub"></div>
+  </section>
+
+  <button class="primary" id="fillBtn" type="button">Autofill this page</button>
+  <div class="hint">Shortcut: <kbd id="shortcut">Alt+Shift+F</kbd> · nothing is submitted for you</div>
+
+  <section class="result" id="result" hidden>
+    <div class="chips" id="chips"></div>
+    <ul id="attention"></ul>
+  </section>
+
+  <footer>
+    <label class="toggle"><input type="checkbox" id="autoToggle"> Auto-fill on supported sites</label>
+  </footer>
+
+  <script src="../shared/profile.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

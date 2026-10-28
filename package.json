@@ -1,0 +1,17 @@
+{
+  "name": "garry-autofill",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Chrome extension that auto-fills job applications (Workday, Greenhouse, Lever, iCIMS, ADP, ...) from a saved profile.",
+  "scripts": {
+    "test": "node tests/run.js",
+    "icons": "node tools/make-icons.js",
+    "package": "node tools/package.js",
+    "e2e": "node tests/e2e/run.js",
+    "check": "node tools/ascii-escape.js --check"
+  },
+  "devDependencies": {
+    "jsdom": "^26.1.0",
+    "puppeteer": "^25.11.0"
+  }
+}

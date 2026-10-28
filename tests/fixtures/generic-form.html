@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+<head><title>Apply — Senior Engineer</title></head>
+<body>
+  <form id="search" role="search"><input name="q" placeholder="Search jobs"></form>
+  <h1>Senior Engineer</h1>
+  <form id="app" action="/submit" method="post">
+    <h2>Personal information</h2>
+    <label for="fn">First Name *</label><input id="fn" name="first_name" required>
+    <label for="ln">Last Name *</label><input id="ln" name="last_name" required>
+    <div class="field"><span class="lbl">Preferred name</span><input id="pn" name="preferred"></div>
+    <label>Email <input type="email" id="em" name="email"></label>
+    <label for="ph">Phone</label><input type="tel" id="ph" name="phone">
+    <label for="addr">Street address</label><input id="addr" name="address1">
+    <label for="city">City</label><input id="city" name="city">
+    <label for="st">State</label>
+    <select id="st" name="state"><option value="">Select...</option><option value="CA">CA</option><option value="NY">NY</option></select>
+    <label for="zip">Zip code</label><input id="zip" name="zip">
+    <label for="country">Country</label>
+    <select id="country" name="country"><option value="">--</option><option>Canada</option><option>United States of America</option></select>
+    <label for="li">LinkedIn Profile</label><input id="li" name="linkedin">
+    <label for="web">Website</label><input id="web" name="website">
+    <label for="resume">Resume/CV</label><input type="file" id="resume" name="resume">
+
+    <h2>Questions</h2>
+    <fieldset id="auth"><legend>Are you legally authorized to work in the United States?</legend>
+      <label><input type="radio" name="auth" value="1"> Yes</label>
+      <label><input type="radio" name="auth" value="0"> No</label>
+    </fieldset>
+    <fieldset id="spons"><legend>Will you now or in the future require sponsorship for employment visa status (e.g. H-1B)?</legend>
+      <label><input type="radio" name="spons" value="1"> Yes</label>
+      <label><input type="radio" name="spons" value="0"> No</label>
+    </fieldset>
+    <label for="hear">How did you hear about this job?</label>
+    <select id="hear" name="hear"><option value="">Please select</option><option>Indeed</option><option>LinkedIn</option><option>Other</option></select>
+    <label for="sal">What are your salary expectations?</label><input id="sal" name="salary">
+    <label for="why">Why do you want to work at Acme?</label><textarea id="why" name="why"></textarea>
+    <label for="notice">What is your notice period?</label><input id="notice" name="notice">
+    <label for="extra">Additional information</label><textarea id="extra" name="extra"></textarea>
+    <label for="ssn">Social Security Number</label><input id="ssn" name="ssn">
+    <label><input type="checkbox" id="privacy" name="privacy"> I have read and agree to the privacy policy</label>
+    <label><input type="checkbox" id="relocate" name="relocate"> I am willing to relocate</label>
+    <label for="sig">Signature (type your full name)</label><input id="sig" name="sig">
+
+    <h2>U.S. Equal Employment Opportunity Information</h2>
+    <label for="gender">Gender</label>
+    <select id="gender" name="gender"><option value="">Select...</option><option>Male</option><option>Female</option><option>Decline To Self Identify</option></select>
+    <label for="hisp">Are you Hispanic/Latino?</label>
+    <select id="hisp" name="hisp"><option value="">Select...</option><option>Yes</option><option>No</option><option>Decline To Self Identify</option></select>
+    <label for="race">Race</label>
+    <select id="race" name="race"><option value="">Select...</option><option>American Indian or Alaskan Native</option><option>Asian</option><option>Black or African American</option><option>White</option><option>Two or More Races</option><option>Decline To Self Identify</option></select>
+    <label for="vet">Veteran Status</label>
+    <select id="vet" name="vet"><option value="">Select...</option><option>I am a veteran</option><option>I am not a veteran</option><option>Decline To Self Identify</option></select>
+    <label for="dis">Disability Status</label>
+    <select id="dis" name="dis"><option value="">Select...</option><option>Yes, I have a disability, or have had one in the past</option><option>No, I do not have a disability and have not had one in the past</option><option>I do not want to answer</option></select>
+
+    <h2>Work Experience</h2>
+    <div class="exp"><label for="t0">Title</label><input id="t0" name="exp[0][title]"><label for="c0">Company</label><input id="c0" name="exp[0][company]"><label><input type="checkbox" id="cur0" name="exp[0][current]"> I currently work here</label></div>
+    <div class="exp"><label for="t1">Title</label><input id="t1" name="exp[1][title]"><label for="c1">Company</label><input id="c1" name="exp[1][company]"></div>
+
+    <h2>Education</h2>
+    <label for="school">School</label><input id="school" name="school">
+    <label for="degree">Degree</label>
+    <select id="degree" name="degree"><option value="">Select</option><option>High School</option><option>Bachelor of Science</option><option>Master of Science</option></select>
+    <label for="major">Major</label><input id="major" name="major">
+
+    <button id="submit">Submit application</button>
+  </form>
+  <script>
+    window.__submitted = 0;
+    document.getElementById('app').addEventListener('submit', function (e) { window.__submitted++; e.preventDefault(); });
+    document.getElementById('submit').addEventListener('click', function () { window.__submitClicked = true; });
+  </script>
+</body>
+</html>

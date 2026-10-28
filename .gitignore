@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Packaged extension builds (npm run package)
+dist/
+build/
+*.zip
+*.crx
+
+# Extension signing key - never commit
+*.pem
+
+# Test output (Puppeteer e2e)
+coverage/
+screenshots/
+test-results/
+tests/e2e/output/
+*.png.diff
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Secrets and local env
+.env
+.env.*
+
+# Local Claude settings
+.claude/settings.local.json
+
+# Editors
+.vscode/
+.idea/
+
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
